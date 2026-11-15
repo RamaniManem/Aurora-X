@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURORA-X — Adaptive Astronaut Cognitive Risk Monitoring</title>
+<!-- Tailwind CSS (Official CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Fallback if offline: all styles are fully bundled in the <style> tag below -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --cyan:#00d4ff; --green:#00ff88; --purple:#9d4edd;
+  --yellow:#ffd700; --red:#ff4466; --orange:#ff8c00;
+  --blue:#0088ff; --bg:#030b18; --card:#071525;
+  --card-border:rgba(0,212,255,.18);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:#c8e8f8;font-family:'Inter',sans-serif;overflow-x:hidden;}
+
+/* ── STARFIELD ── */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--delay,0s);}
+@keyframes twinkle{0%,100%{opacity:var(--op,.4);transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+
+/* ── NEBULA BG ── */
+.nebula{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 30%,rgba(0,80,180,.12) 0,transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 70%,rgba(100,0,180,.1) 0,transparent 70%),
+    radial-gradient(ellipse 40% 30% at 55% 10%,rgba(0,160,120,.08) 0,transparent 70%);
+}
+
+/* ── LAYOUT ── */
+section{position:relative;z-index:1;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(3,11,24,.88);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(0,212,255,.2);
+  padding:12px 40px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;
+  color:var(--cyan);text-shadow:0 0 20px var(--cyan);letter-spacing:3px;display:flex;align-items:center;gap:10px;}
+.nav-links{display:flex;gap:26px;}
+.nav-links a{color:#4a8aaa;text-decoration:none;font-size:12px;letter-spacing:2px;
+  text-transform:uppercase;transition:.2s;}
+.nav-links a:hover{color:var(--cyan);}
+.nav-badge{background:rgba(0,212,255,.12);border:1px solid var(--cyan);
+  color:var(--cyan);padding:8px 20px;border-radius:20px;font-size:11px;
+  letter-spacing:2px;cursor:pointer;transition:.3s;font-family:'Orbitron',monospace;font-weight:700;}
+.nav-badge:hover{background:rgba(0,212,255,.25);box-shadow:0 0 20px rgba(0,212,255,.5);transform:scale(1.03);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:120px 20px 60px;}
+
+.hero-eyebrow{font-size:11px;letter-spacing:5px;color:var(--cyan);text-transform:uppercase;
+  margin-bottom:20px;opacity:.9;background:rgba(0,212,255,.08);padding:6px 18px;border-radius:20px;border:1px solid rgba(0,212,255,.25);}
+
+.hero-title{font-family:'Orbitron',monospace;font-size:clamp(48px,8vw,96px);
+  font-weight:900;line-height:1.05;letter-spacing:4px;margin-bottom:16px;
+  background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 35px rgba(0,212,255,.45));}
+
+.hero-subtitle{font-family:'Orbitron',monospace;font-size:clamp(10px,1.5vw,14px);
+  color:var(--cyan);letter-spacing:4px;margin-bottom:30px;opacity:.85;}
+
+.hero-desc{max-width:680px;font-size:16px;line-height:1.75;color:#8ab8d0;margin-bottom:46px;}
+
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.btn-primary{padding:14px 36px;background:linear-gradient(135deg,rgba(0,120,200,.5),rgba(0,212,255,.3));
+  border:1px solid var(--cyan);color:var(--cyan);border-radius:40px;font-size:13px;
+  letter-spacing:2px;cursor:pointer;transition:.3s;text-transform:uppercase;font-weight:600;}
+.btn-primary:hover{background:linear-gradient(135deg,rgba(0,160,255,.6),rgba(0,212,255,.4));
+  box-shadow:0 0 30px rgba(0,212,255,.5);transform:translateY(-2px);}
+.btn-secondary{padding:14px 36px;background:transparent;
+  border:1px solid rgba(0,212,255,.3);color:#8ab8d0;border-radius:40px;font-size:13px;
+  letter-spacing:2px;cursor:pointer;transition:.3s;text-transform:uppercase;}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px);}
+
+/* ── ORBIT VISUAL ── */
+.orbit-wrap{position:relative;width:280px;height:280px;margin:40px auto 0;}
+.orbit-planet{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.planet-core{width:90px;height:90px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#1a6aaa,#030b18);
+  box-shadow:0 0 40px rgba(0,180,255,.6),0 0 80px rgba(0,100,200,.3);
+  display:flex;align-items:center;justify-content:center;font-size:36px;}
+.orbit-ring{position:absolute;border-radius:50%;border:1px solid;animation:spin linear infinite;}
+.ring1{width:160px;height:160px;border-color:rgba(0,212,255,.3);animation-duration:8s;top:60px;left:60px;}
+.ring2{width:220px;height:220px;border-color:rgba(157,78,221,.2);animation-duration:14s;top:30px;left:30px;animation-direction:reverse;}
+.ring3{width:270px;height:270px;border-color:rgba(0,255,136,.15);animation-duration:22s;top:5px;left:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orbit-dot{position:absolute;width:10px;height:10px;border-radius:50%;top:0;left:50%;
+  margin-left:-5px;margin-top:-5px;}
+
+/* ── SECTION SHARED ── */
+.section-wrap{max-width:1200px;margin:0 auto;padding:80px 24px;}
+.section-label{font-size:10px;letter-spacing:5px;color:var(--cyan);text-transform:uppercase;
+  margin-bottom:12px;opacity:.8;}
+.section-title{font-family:'Orbitron',monospace;font-size:clamp(28px,4vw,44px);
+  font-weight:700;margin-bottom:16px;line-height:1.2;}
+.section-line{width:60px;height:2px;
+  background:linear-gradient(90deg,var(--cyan),transparent);margin-bottom:40px;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:70px;}
+.stat-card{background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:12px;
+  padding:28px 20px;text-align:center;position:relative;overflow:hidden;transition:.3s;}
+.stat-card:hover{border-color:rgba(0,212,255,.4);box-shadow:0 0 30px rgba(0,212,255,.1);transform:translateY(-4px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.stat-num{font-family:'Orbitron',monospace;font-size:40px;font-weight:900;
+  color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,.5);}
+.stat-label{font-size:11px;letter-spacing:2px;color:#4a7a94;text-transform:uppercase;margin-top:8px;}
+
+/* ── LIVE MISSION CONSOLE (INTERACTIVE DEMO) ── */
+#live-demo{position:relative;background:linear-gradient(180deg,rgba(3,11,24,0) 0%,rgba(0,212,255,.03) 50%,rgba(3,11,24,0) 100%);}
+.console-box{background:rgba(7,21,37,0.92);border:1px solid rgba(0,212,255,.3);border-radius:20px;
+  box-shadow:0 0 50px rgba(0,212,255,.12);backdrop-filter:blur(20px);overflow:hidden;}
+.console-header{background:rgba(3,11,24,.8);border-bottom:1px solid rgba(0,212,255,.2);
+  padding:18px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.console-title{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:2px;display:flex;align-items:center;gap:10px;}
+.telemetry-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:22px;}
+.t-tile{background:rgba(3,11,24,.6);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:16px;position:relative;transition:.3s;}
+.t-tile:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,212,255,.15);}
+.t-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;color:#4a7a94;text-transform:uppercase;}
+.t-val{font-family:'Orbitron',monospace;font-size:24px;font-weight:700;color:#c8e8f8;margin:6px 0;}
+.t-sub{font-size:10px;color:#4a7a94;}
+
+.console-body{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;padding:0 22px 22px;}
+.eeg-screen{background:rgba(3,11,24,.85);border:1px solid rgba(0,212,255,.2);border-radius:14px;padding:18px;position:relative;}
+.scenario-bar{display:flex;gap:10px;flex-wrap:wrap;padding:16px 22px;background:rgba(3,11,24,.4);border-top:1px solid rgba(0,212,255,.1);}
+.sc-btn{padding:8px 16px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);border-radius:8px;
+  color:#c8e8f8;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:.2s;}
+.sc-btn:hover,.sc-btn.active{background:rgba(0,212,255,.25);border-color:var(--cyan);color:#fff;box-shadow:0 0 15px rgba(0,212,255,.3);}
+
+.surgeon-panel{background:rgba(3,11,24,.85);border:1px solid rgba(0,255,136,.25);border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;}
+.chat-mini-list{display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;margin:12px 0;padding-right:6px;}
+.chat-msg{background:rgba(7,21,37,.8);border-left:3px solid var(--cyan);padding:8px 12px;border-radius:6px;font-size:12px;line-height:1.5;}
+.chat-msg.doc{border-left-color:var(--green);background:rgba(0,255,136,.06);}
+
+/* ── PROBLEM ── */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+.problem-visual{position:relative;}
+.alert-stack{display:flex;flex-direction:column;gap:10px;}
+.alert-item{background:var(--card);border-radius:10px;padding:14px 18px;
+  display:flex;align-items:center;gap:14px;border:1px solid;animation:slideIn .6s ease both;}
+.alert-item.r{border-color:rgba(255,68,70,.4);box-shadow:0 0 20px rgba(255,68,70,.1);}
+.alert-item.o{border-color:rgba(255,140,0,.4);box-shadow:0 0 20px rgba(255,140,0,.1);}
+.alert-item.y{border-color:rgba(255,215,0,.35);box-shadow:0 0 20px rgba(255,215,0,.08);}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.alert-icon{font-size:22px;flex-shrink:0;}
+.alert-text{font-size:13px;line-height:1.5;}
+.alert-title{font-weight:600;margin-bottom:2px;}
+.problem-text p{font-size:15px;line-height:1.8;color:#8ab8d0;margin-bottom:16px;}
+
+/* ── SOLUTION ── */
+.solution-bg{background:linear-gradient(180deg,transparent,rgba(0,212,255,.03),transparent);}
+.pipeline{display:flex;align-items:center;gap:0;margin:40px 0;flex-wrap:wrap;justify-content:center;}
+.pipe-node{background:var(--card);border:1px solid rgba(0,212,255,.25);border-radius:12px;
+  padding:20px 18px;text-align:center;min-width:150px;position:relative;transition:.3s;}
+.pipe-node:hover{border-color:var(--cyan);box-shadow:0 0 25px rgba(0,212,255,.2);transform:translateY(-4px);}
+.pipe-icon{font-size:28px;margin-bottom:8px;}
+.pipe-title{font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;}
+.pipe-desc{font-size:9px;color:#4a7a94;margin-top:4px;line-height:1.4;}
+.pipe-arrow{color:var(--cyan);font-size:20px;padding:0 8px;opacity:.5;}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.feat-card{background:var(--card);border:1px solid rgba(0,212,255,.12);border-radius:16px;
+  padding:30px;position:relative;overflow:hidden;transition:.4s;cursor:default;}
+.feat-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-6px);
+  box-shadow:0 20px 60px rgba(0,212,255,.12);}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.feat-card.c1::before{background:linear-gradient(90deg,var(--cyan),var(--blue));}
+.feat-card.c2::before{background:linear-gradient(90deg,var(--purple),var(--cyan));}
+.feat-card.c3::before{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.feat-card.c4::before{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.feat-icon{font-size:40px;margin-bottom:16px;}
+.feat-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;
+  color:var(--cyan);margin-bottom:10px;letter-spacing:1px;}
+.feat-desc{font-size:13px;line-height:1.75;color:#8ab8d0;margin-bottom:16px;}
+.feat-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{padding:3px 10px;border-radius:12px;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;border:1px solid;}
+.tag-cyan{border-color:rgba(0,212,255,.4);color:var(--cyan);background:rgba(0,212,255,.08);}
+.tag-purple{border-color:rgba(157,78,221,.4);color:var(--purple);background:rgba(157,78,221,.08);}
+.tag-green{border-color:rgba(0,255,136,.4);color:var(--green);background:rgba(0,255,136,.08);}
+.tag-yellow{border-color:rgba(255,215,0,.4);color:var(--yellow);background:rgba(255,215,0,.08);}
+
+/* ── DUAL MODE ── */
+.modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.mode-card{border-radius:16px;padding:32px;position:relative;overflow:hidden;}
+.mode-helmet{background:linear-gradient(135deg,rgba(0,136,255,.12),rgba(0,212,255,.06));
+  border:1px solid rgba(0,136,255,.35);}
+.mode-cabin{background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.04));
+  border:1px solid rgba(0,255,136,.3);}
+.mode-icon{font-size:52px;margin-bottom:16px;}
+.mode-title{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;margin-bottom:8px;}
+.mode-helmet .mode-title{color:var(--blue);}
+.mode-cabin .mode-title{color:var(--green);}
+.mode-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:9px;
+  letter-spacing:2px;font-weight:700;margin-bottom:16px;}
+.mode-helmet .mode-badge{background:rgba(0,136,255,.2);border:1px solid var(--blue);color:var(--blue);}
+.mode-cabin .mode-badge{background:rgba(0,255,136,.15);border:1px solid var(--green);color:var(--green);}
+.mode-desc{font-size:13px;line-height:1.75;color:#8ab8d0;margin-bottom:20px;}
+.mode-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.mode-list li{font-size:12px;color:#8ab8d0;display:flex;align-items:center;gap:8px;}
+.mode-list li::before{content:'▹';color:var(--cyan);flex-shrink:0;}
+
+/* ── EEG PIPELINE ── */
+.eeg-pipeline{background:var(--card);border:1px solid rgba(0,212,255,.15);
+  border-radius:16px;padding:30px;margin:30px 0;}
+.eeg-steps{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:10px 0;}
+.eeg-step{min-width:140px;text-align:center;padding:0 10px;position:relative;}
+.eeg-step:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:16px;
+  color:var(--cyan);font-size:16px;opacity:.5;}
+.eeg-bubble{width:44px;height:44px;border-radius:50%;margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid;}
+.eeg-step-title{font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.eeg-step-desc{font-size:8.5px;color:#4a7a94;line-height:1.5;}
+
+/* ── RESEARCH ── */
+.research-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.research-card{background:var(--card);border:1px solid rgba(0,212,255,.12);
+  border-radius:12px;padding:20px;display:flex;gap:14px;align-items:flex-start;transition:.3s;}
+.research-card:hover{border-color:rgba(0,212,255,.3);transform:translateX(4px);}
+.research-org{font-size:9px;font-weight:700;letter-spacing:2px;padding:4px 10px;
+  border-radius:8px;text-transform:uppercase;flex-shrink:0;margin-top:2px;}
+.org-nasa{background:rgba(255,100,0,.15);border:1px solid rgba(255,100,0,.4);color:#ff8c00;}
+.org-esa{background:rgba(0,136,255,.15);border:1px solid rgba(0,136,255,.4);color:var(--blue);}
+.org-pmc{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.4);color:var(--green);}
+.research-title{font-size:13px;font-weight:600;color:#c8e8f8;margin-bottom:4px;}
+.research-desc{font-size:11px;color:#4a7a94;line-height:1.5;}
+
+/* ── CAUTION ── */
+.caution-box{background:rgba(255,68,70,.06);border:1px solid rgba(255,68,70,.3);
+  border-radius:12px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start;margin-top:20px;}
+.caution-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.caution-text{font-size:12px;line-height:1.65;color:#cc8888;}
+
+/* ── TECH STACK ── */
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.tech-card{background:var(--card);border:1px solid rgba(0,212,255,.1);
+  border-radius:12px;padding:20px;text-align:center;transition:.3s;}
+.tech-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-4px);}
+.tech-icon{font-size:32px;margin-bottom:10px;}
+.tech-title{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  color:var(--cyan);letter-spacing:1px;margin-bottom:6px;}
+.tech-desc{font-size:11px;color:#4a7a94;line-height:1.5;}
+
+/* ── ROADMAP ── */
+.roadmap{position:relative;padding:20px 0;}
+.roadmap::before{content:'';position:absolute;left:50%;top:0;bottom:0;
+  width:2px;background:linear-gradient(180deg,var(--cyan),var(--purple),transparent);transform:translateX(-50%);}
+.rm-row{display:flex;gap:30px;margin-bottom:36px;align-items:center;}
+.rm-row.left{flex-direction:row-reverse;}
+.rm-card{flex:1;background:var(--card);border:1px solid rgba(0,212,255,.15);
+  border-radius:12px;padding:20px 24px;transition:.3s;}
+.rm-card:hover{border-color:rgba(0,212,255,.35);box-shadow:0 0 25px rgba(0,212,255,.1);}
+.rm-phase{font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.rm-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  color:var(--cyan);margin-bottom:8px;}
+.rm-desc{font-size:12px;color:#8ab8d0;line-height:1.6;}
+.rm-dot{width:40px;height:40px;border-radius:50%;border:2px solid var(--cyan);
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;position:relative;z-index:1;
+  box-shadow:0 0 20px rgba(0,212,255,.4);}
+.rm-spacer{flex:1;}
+
+/* ── CTA ── */
+.cta-section{background:linear-gradient(180deg,transparent,rgba(0,212,255,.04),transparent);}
+.cta-box{text-align:center;padding:80px 20px;}
+.cta-title{font-family:'Orbitron',monospace;font-size:clamp(32px,5vw,56px);
+  font-weight:900;color:var(--cyan);text-shadow:0 0 40px rgba(0,212,255,.5);
+  margin-bottom:16px;letter-spacing:4px;}
+.cta-sub{font-size:16px;color:#8ab8d0;margin-bottom:40px;}
+.cta-badges{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;}
+.cta-badge{padding:8px 20px;border-radius:20px;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;border:1px solid;}
+
+/* ── FOOTER ── */
+footer{background:rgba(3,11,24,.9);border-top:1px solid rgba(0,212,255,.1);
+  padding:30px 40px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.footer-logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;
+  color:var(--cyan);letter-spacing:3px;}
+.footer-text{font-size:11px;color:#2a5272;letter-spacing:1px;}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(30px);transition:.7s cubic-bezier(.4,0,.2,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── GLOW PULSE ── */
+@keyframes glow{0%,100%{text-shadow:0 0 20px rgba(0,212,255,.4)}50%{text-shadow:0 0 50px rgba(0,212,255,.8),0 0 100px rgba(0,212,255,.3)}}
+.glow-pulse{animation:glow 3s ease-in-out infinite;}
+
+/* ── BADGE STATUS ── */
+.status-line{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:30px 0;}
+.status-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#4a7a94;}
+.sdot{width:8px;height:8px;border-radius:50%;animation:blink 2s infinite;}
+.sdot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+.sdot.c{background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+.sdot.p{background:var(--purple);box-shadow:0 0 8px var(--purple);}
+.sdot.r{background:var(--red);box-shadow:0 0 8px var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* QKD mini */
+.qkd-mini{background:linear-gradient(135deg,rgba(157,78,221,.1),rgba(0,212,255,.05));
+  border:1px solid rgba(157,78,221,.3);border-radius:12px;padding:20px;margin-top:20px;}
+.qkd-secure{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
+  background:rgba(0,255,136,.1);border:1px solid var(--green);border-radius:20px;
+  font-size:11px;font-weight:700;color:var(--green);letter-spacing:1px;}
+
+/* Responsive */
+@media(max-width:960px){
+  .console-body{grid-template-columns:1fr;}
+  .telemetry-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .problem-grid,.features-grid,.modes-grid,.research-grid,.tech-grid{grid-template-columns:1fr;}
+  .roadmap::before{left:20px;}
+  .rm-row,.rm-row.left{flex-direction:column;padding-left:50px;}
+  .rm-dot{position:absolute;left:0;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"></div>
+<div class="nebula"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">
+    <span>🚀</span> AURORA-X
+  </div>
+  <div class="nav-links">
+    <a href="#live-demo">Live Demo</a>
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#features">Features</a>
+    <a href="#modes">Modes</a>
+    <a href="#research">Research</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+  <button class="nav-badge" onclick="document.getElementById('live-demo').scrollIntoView({behavior:'smooth'})">LAUNCH CONSOLE ⚡</button>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-eyebrow">🚀 NASA Space Mission Cognitive Health Initiative</div>
+
+  <div class="hero-title glow-pulse">AURORA-X</div>
+  <div class="hero-subtitle">Adaptive Unified Risk & Operations Awareness — Extended</div>
+
+  <p class="hero-desc">
+    An on-board AI system that autonomously monitors astronaut cognitive health and mission risk during deep-space missions — using data already available on the spacecraft, with no extra wearables required.
+  </p>
+
+  <div class="status-line">
+    <div class="status-item"><span class="sdot g"></span>Data Confidence Engine — ACTIVE</div>
+    <div class="status-item"><span class="sdot c"></span>Risk Analysis Engine — RUNNING</div>
+    <div class="status-item"><span class="sdot p"></span>QML EEG Module — STANDBY</div>
+    <div class="status-item"><span class="sdot g"></span>Earth Link — SECURE (BB84)</div>
+  </div>
+
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('live-demo').scrollIntoView({behavior:'smooth'})">⚡ Launch Live Console</button>
+    <button class="btn-secondary" onclick="document.getElementById('solution').scrollIntoView({behavior:'smooth'})">🔍 Explore Pipeline</button>
+    <button class="btn-secondary" onclick="document.getElementById('research').scrollIntoView({behavior:'smooth'})">📄 Research Basis</button>
+  </div>
+
+  <div class="orbit-wrap">
+    <div class="orbit-planet">
+      <div class="planet-core">🌍</div>
+    </div>
+    <div class="orbit-ring ring1">
+      <div class="orbit-dot" style="background:var(--cyan);box-shadow:0 0 10px var(--cyan);"></div>
+    </div>
+    <div class="orbit-ring ring2">
+      <div class="orbit-dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);top:0;left:60%;"></div>
+    </div>
+    <div class="orbit-ring ring3">
+      <div class="orbit-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);top:0;left:30%;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section id="stats">
+  <div class="section-wrap">
+    <div class="stats-grid reveal">
+      <div class="stat-card">
+        <div class="stat-num" data-target="24">0</div>
+        <div class="stat-label">Min Earth Comm Delay (Deep Space)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="85">0</div>
+        <div class="stat-label">% Human Errors from Cognitive Fatigue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="0">0</div>
+        <div class="stat-label">Extra Wearables Required by AURORA-X</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="5">0</div>
+        <div class="stat-label">Multi-Domain Data Streams Fused</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LIVE MISSION CONSOLE DEMO ── -->
+<section id="live-demo">
+  <div class="section-wrap" style="padding-top:20px;">
+    <div class="reveal" style="text-align:center;margin-bottom:30px;">
+      <div class="section-label">Interactive Mission Software Prototype</div>
+      <div class="section-title">ASTRA-Med Real-Time Cockpit</div>
+      <div class="section-line" style="margin:0 auto 12px;"></div>
+      <p style="font-size:14px;color:#8ab8d0;max-width:650px;margin:0 auto;">Simulate live astronaut telemetry, EEG quantum wave classification, autonomous suit adjustments, and BB84 quantum channel security in real time.</p>
+    </div>
+
+    <div class="console-box reveal">
+      <!-- Console Top Bar -->
+      <div class="console-header">
+        <div class="console-title">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);"></span>
+          MISSION ORION-IX · LUNAR TRANSFER ORBIT
+        </div>
+        <div style="display:flex;gap:20px;font-size:11px;color:#8ab8d0;font-family:'Orbitron',monospace;">
+          <div>MET: <span id="metCounter" style="color:var(--cyan)">04d 18h 42m 19s</span></div>
+          <div>DIST: <span style="color:var(--yellow)">342,180 KM</span></div>
+          <div>DELAY: <span style="color:var(--red)">19m 42s</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <label style="font-size:11px;color:#4a7a94;letter-spacing:1px;">ACTIVE CREW:</label>
+          <select id="crewSelect" style="background:#030b18;color:var(--cyan);border:1px solid rgba(0,212,255,.3);border-radius:6px;padding:4px 10px;font-size:12px;font-family:'Inter',sans-serif;outline:none;" onchange="updateCrewMember()">
+            <option value="hayes">CDR Hayes (Mission Commander)</option>
+            <option value="patel">Dr. A. Patel (Flight Surgeon)</option>
+            <option value="chen">Spc. K. Chen (EVA Specialist)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Row -->
+      <div class="telemetry-grid">
+        <div class="t-tile">
+          <div class="t-lbl">❤️ Heart Rate</div>
+          <div class="t-val" id="valHr"><span id="hrNum">72</span> <span style="font-size:14px;font-weight:400;color:#4a7a94">BPM</span></div>
+          <div class="t-sub" id="subHr">Normal Rest · Baseline 68</div>
+        </div>
+        <div class="t-tile">
+          <div class="t-lbl">🫁 Respiration & SpO₂</div>
+          <div class="t-val" id="valSpo2">98.4<span style="font-size:14px;font-weight:400;color:#4a7a94">%</span></div>
+          <div class="t-sub">Resp: 14 br/min · Stable</div>
+        </div>
+        <div class="t-tile">
+          <div class="t-lbl">🧠 Frontal θ/β Ratio</div>
+          <div class="t-val" id="valThetaBeta" style="color:var(--green);">1.14</div>
+          <div class="t-sub" id="subTheta">Normal Focus (NE state)</div>
+        </div>
+        <div class="t-tile">
+          <div class="t-lbl">⚡ QML Cognitive State</div>
+          <div class="t-val" id="valCogState" style="color:var(--cyan);font-size:20px;">NOMINAL</div>
+          <div class="t-sub" id="subCogState">8-Qubit VQC Confidence: 96.2%</div>
+        </div>
+        <div class="t-tile">
+          <div class="t-lbl">🔐 QKD QBER Rate</div>
+          <div class="t-val" id="valQber" style="color:var(--green);">2.8<span style="font-size:14px;font-weight:400;color:#4a7a94">%</span></div>
+          <div class="t-sub" id="subQber">Threshold &lt; 11% · BB84 Locked</div>
+        </div>
+      </div>
+
+      <!-- Main Interactive Display (EEG Canvas + Surgeon Panel) -->
+      <div class="console-body">
+        <!-- EEG Scope -->
+        <div class="eeg-screen">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:1.5px;color:var(--cyan);">
+              ⚛️ DUAL-MODE NEURO-TELEMETRY (HELMET/CABIN)
+            </div>
+            <div style="font-size:10px;padding:3px 10px;border-radius:12px;background:rgba(0,255,136,.1);border:1px solid var(--green);color:var(--green);" id="modePill">
+              HELMET MODE ACTIVE
+            </div>
+          </div>
+          <!-- Waveform Canvas -->
+          <canvas id="eegCanvas" width="600" height="210" style="width:100%;height:210px;border-radius:8px;background:#020710;display:block;border:1px solid rgba(0,212,255,.12);"></canvas>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#4a7a94;">
+            <span>Ch 1: Frontal θ (4–8 Hz)</span>
+            <span>Ch 2: Parietal α (8–13 Hz)</span>
+            <span>Ch 3: Sensorimotor β (13–30 Hz)</span>
+            <span style="color:var(--cyan);" id="artifactFilterStatus">Artifact Filter: 99.4% SNR</span>
+          </div>
+        </div>
+
+        <!-- AI Flight Surgeon Panel -->
+        <div class="surgeon-panel">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--green);letter-spacing:1px;display:flex;align-items:center;gap:6px;">
+                <span>🤖</span> GEMINI FLIGHT SURGEON
+              </div>
+              <span id="riskBadge" style="font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:10px;background:rgba(0,255,136,.15);border:1px solid var(--green);color:var(--green);">
+                LOW RISK
+              </span>
+            </div>
+
+            <!-- Clinical Assessment Card -->
+            <div id="surgeonAssessment" style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:#c8e8f8;">
+              <div style="font-weight:600;color:var(--cyan);margin-bottom:4px;">Clinical Assessment:</div>
+              Astronaut vitals within nominal envelope. Normal baseline theta/beta ratio (1.14). Sleep debt 1.4h (acceptable). Workload capacity estimated at 92%. No intervention necessary.
+            </div>
+
+            <!-- Autonomous Interventions -->
+            <div style="margin-top:12px;">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#4a7a94;text-transform:uppercase;margin-bottom:6px;">Automated Autonomous Interventions:</div>
+              <div id="interventionList" style="font-size:11px;color:#8ab8d0;display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Garment Biometric Polling: 100 Hz Continuous</div>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Suit Environmental Thermal: Nominal (21.4°C)</div>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Local Deep-Space Autonomous Engine: Armed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Crew Chat Input -->
+          <div style="margin-top:14px;border-top:1px solid rgba(0,212,255,.1);padding-top:10px;">
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="crewChatInput" placeholder="Ask AI Surgeon (e.g. 'Assess fatigue risk', 'Check EVA suit')" style="flex:1;background:#030b18;border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:8px 12px;font-size:11px;color:#fff;outline:none;" onkeypress="if(event.key==='Enter') sendCrewMessage()">
+              <button onclick="sendCrewMessage()" style="background:rgba(0,212,255,.2);border:1px solid var(--cyan);color:var(--cyan);border-radius:6px;padding:0 14px;font-size:11px;cursor:pointer;font-weight:600;">ASK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenarios Selector Bar -->
+      <div class="scenario-bar">
+        <span style="font-size:11px;color:#4a7a94;letter-spacing:1px;align-self:center;font-weight:600;">SIMULATE SCENARIO:</span>
+        <button class="sc-btn active" id="btnNominal" onclick="triggerScenario('nominal')">Normal Activity</button>
+        <button class="sc-btn" id="btnFatigue" onclick="triggerScenario('fatigue')">⚠️ EVA Fatigue Spike</button>
+        <button class="sc-btn" id="btnChannelized" onclick="triggerScenario('channelized')">⚡ Channelized Attention</button>
+        <button class="sc-btn" id="btnQkdAttack" onclick="triggerScenario('qkd')">🔒 QKD Eavesdrop Intercept</button>
+        <button class="sc-btn" id="btnCabinMode" onclick="triggerScenario('cabin')">🛸 Toggle Cabin Fallback</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROBLEM ── -->
+<section id="problem">
+  <div class="section-wrap">
+    <div class="problem-grid">
+      <div class="problem-text reveal">
+        <div class="section-label">The Challenge</div>
+        <div class="section-title">Why Astronauts Need Smarter Health Monitoring</div>
+        <div class="section-line"></div>
+        <p>Long-duration deep-space missions subject astronauts to extreme cognitive stress — sleep deprivation, isolation, prolonged EVA fatigue, and radiation effects on the brain.</p>
+        <p>Existing solutions either require <strong style="color:var(--cyan)">continuous wearables</strong> that become impractical over months-long missions, or depend on <strong style="color:var(--cyan)">real-time Earth communication</strong> — impossible during deep space travel where signals take up to 24 minutes each way.</p>
+        <p>Human error rooted in cognitive fatigue is a leading cause of near-misses in space operations. We need a system that works <strong style="color:var(--cyan)">autonomously, silently, and continuously</strong> — without adding burden to the crew.</p>
+      </div>
+      <div class="problem-visual reveal" style="animation-delay:.2s">
+        <div class="alert-stack">
+          <div class="alert-item r" style="animation-delay:.1s">
+            <span class="alert-icon">🧠</span>
+            <div class="alert-text">
+              <div class="alert-title" style="color:#ff4466">Cognitive Fatigue Detected</div>
+              <div style="color:#cc8888;font-size:12px;">θ/β ratio elevated to 2.1 — 47% above baseline. Sleep debt: 18 hours. High error risk.</div>
+            </div>
+          </div>
+          <div class="alert-item o" style="animation-delay:.25s">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-text">
+              <div class="alert-title" style="color:#ff8c00">Channelized Attention Identified</div>
+              <div style="color:#cc9966;font-size:12px;">EEG pattern CA confirmed. HRV critically low at 22ms. Recommend task handoff.</div>
+            </div>
+          </div>
+          <div class="alert-item y" style="animation-delay:.4s">
+            <span class="alert-icon">📡</span>
+            <div class="alert-text">
+              <div class="alert-title" style="color:#ffd700">Earth Comm Blackout — 24 Min Delay</div>
+              <div style="color:#aa9944;font-size:12px;">AURORA-X operating autonomously. No ground support available. Local decisions only.</div>
+            </div>
+          </div>
+          <div class="alert-item" style="border-color:rgba(0,255,136,.3);box-shadow:0 0 20px rgba(0,255,136,.08);animation-delay:.55s">
+            <span class="alert-icon">✅</span>
+            <div class="alert-text">
+              <div class="alert-title" style="color:#00ff88">AURORA-X Autonomous Response</div>
+              <div style="color:#669966;font-size:12px;">Suit cooling +10%. Task load reduced. CDR Hayes notified. Risk level downgraded to YELLOW.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SOLUTION ── -->
+<section id="solution" class="solution-bg">
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:50px;">
+      <div class="section-label">The Solution</div>
+      <div class="section-title">How AURORA-X Works</div>
+      <div class="section-line" style="margin:0 auto 20px;"></div>
+      <p style="font-size:15px;color:#8ab8d0;max-width:600px;margin:0 auto;">AURORA-X fuses data from existing spacecraft systems through a 4-stage intelligent pipeline — no new hardware required for baseline operation.</p>
+    </div>
+
+    <div class="pipeline reveal">
+      <div class="pipe-node">
+        <div class="pipe-icon">📡</div>
+        <div class="pipe-title">Data Sources</div>
+        <div class="pipe-desc">Medical telemetry, environmental sensors, sleep logs, mission workload, check-ins</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node">
+        <div class="pipe-icon">🔍</div>
+        <div class="pipe-title">Data Confidence Engine</div>
+        <div class="pipe-desc">Validates reliability, scores each stream, triggers check-ins if insufficient</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node">
+        <div class="pipe-icon">🤖</div>
+        <div class="pipe-title">Risk Analysis Engine</div>
+        <div class="pipe-desc">Multi-domain ML pattern analysis across physiology, sleep, environment & ops</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-node">
+        <div class="pipe-icon">🩺</div>
+        <div class="pipe-title">Explainable Alerts</div>
+        <div class="pipe-desc">Human-readable risk assessments + automated suit adjustments + recommendations</div>
+      </div>
+    </div>
+
+    <!-- Data domains table -->
+    <div class="reveal" style="margin-top:40px;">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+        <div style="background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">❤️</div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);letter-spacing:1px;margin-bottom:4px;">PHYSIOLOGICAL</div>
+          <div style="font-size:10px;color:#4a7a94;line-height:1.5;">Heart Rate · HRV<br>Blood O₂ · Temp</div>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">😴</div>
+          <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:4px;">SLEEP</div>
+          <div style="font-size:10px;color:#4a7a94;line-height:1.5;">Duration · Quality<br>Circadian rhythm</div>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">🌡️</div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:4px;">ENVIRONMENTAL</div>
+          <div style="font-size:10px;color:#4a7a94;line-height:1.5;">CO₂ · Pressure<br>Radiation · Light</div>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">📋</div>
+          <div style="font-size:10px;font-weight:700;color:var(--yellow);letter-spacing:1px;margin-bottom:4px;">OPERATIONAL</div>
+          <div style="font-size:10px;color:#4a7a94;line-height:1.5;">Task load · EVA<br>Error logs · Timing</div>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">🧘</div>
+          <div style="font-size:10px;font-weight:700;color:var(--purple);letter-spacing:1px;margin-bottom:4px;">PSYCHOLOGICAL</div>
+          <div style="font-size:10px;color:#4a7a94;line-height:1.5;">Mood check-ins<br>Isolation metrics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section id="features">
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:50px;">
+      <div class="section-label">Core Features</div>
+      <div class="section-title">Four Intelligent Subsystems</div>
+      <div class="section-line" style="margin:0 auto;"></div>
+    </div>
+
+    <div class="features-grid">
+
+      <!-- Feature 1 -->
+      <div class="feat-card c1 reveal">
+        <div class="feat-icon">📡</div>
+        <div class="feat-title">Multi-Modal Telemetry Simulator</div>
+        <div class="feat-desc">Real-time fusion of smart garment vitals (HR, HRV, GSR, respiration) with suit environmental sensors (O₂, CO₂, temperature). Astronaut profile baselines enable deviation detection, not just threshold alerts.</div>
+        <div class="feat-tags">
+          <span class="tag tag-cyan">HR / HRV</span>
+          <span class="tag tag-cyan">Suit O₂/CO₂</span>
+          <span class="tag tag-cyan">GSR</span>
+          <span class="tag tag-cyan">Baseline Comparison</span>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feat-card c2 reveal" style="animation-delay:.1s">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">QML EEG Diagnostic Panel</div>
+        <div class="feat-desc">Simulated 8-Qubit Variational Quantum Circuit classifies astronaut cognitive state (NE / CA / DA / SS) and fatigue level (0–3). Computes Theta/Beta Fatigue Ratio and Cognitive Load Index from live EEG brainwave data.</div>
+        <div class="feat-tags">
+          <span class="tag tag-purple">Quantum ML</span>
+          <span class="tag tag-purple">EEG θ/β Ratio</span>
+          <span class="tag tag-purple">8-Qubit VQC</span>
+          <span class="tag tag-cyan">Fatigue Gauge</span>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feat-card c3 reveal" style="animation-delay:.15s">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">AI Flight Surgeon Agent</div>
+        <div class="feat-desc">Powered by Gemini. Receives combined garment vitals, suit telemetry, QML EEG predictions, and historical baselines. Delivers calm, clinical recommendations with automated suit adjustments and risk levels. Supports follow-up crew chat.</div>
+        <div class="feat-tags">
+          <span class="tag tag-green">Gemini API</span>
+          <span class="tag tag-green">Explainable AI</span>
+          <span class="tag tag-green">Auto Adjustments</span>
+          <span class="tag tag-green">Crew Chat</span>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feat-card c4 reveal" style="animation-delay:.2s">
+        <div class="feat-icon">🔐</div>
+        <div class="feat-title">Quantum Security — BB84 QKD</div>
+        <div class="feat-desc">Simulates BB84 Quantum Key Distribution for the space-to-Earth biometric link. Monitors Quantum Bit Error Rate (QBER). Automatically blocks transmission if QBER &gt;11% (eavesdropper detected), protecting astronaut privacy.</div>
+        <div class="feat-tags">
+          <span class="tag tag-yellow">BB84 Protocol</span>
+          <span class="tag tag-yellow">QBER Monitor</span>
+          <span class="tag tag-yellow">Eve Detection</span>
+          <span class="tag tag-yellow">AES-256</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── DUAL MODES ── -->
+<section id="modes">
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:50px;">
+      <div class="section-label">Operational Design</div>
+      <div class="section-title">Two Seamless Operating Modes</div>
+      <div class="section-line" style="margin:0 auto 16px;"></div>
+      <p style="font-size:14px;color:#8ab8d0;max-width:550px;margin:0 auto;">Astronauts don't wear helmets continuously inside spacecraft. AURORA-X adapts automatically — no manual switching required.</p>
+    </div>
+
+    <div class="modes-grid reveal">
+
+      <div class="mode-card mode-helmet">
+        <div class="mode-icon">🪖</div>
+        <div class="mode-title">HELMET MODE</div>
+        <div class="mode-badge">DURING EVA</div>
+        <div class="mode-desc">When the astronaut wears a compatible helmet with embedded EEG electrodes, AURORA-X gains full neuro-cognitive data on top of all spacecraft telemetry.</div>
+        <ul class="mode-list">
+          <li>EEG electrodes in inner helmet lining</li>
+          <li>Frontal Theta — cognitive workload marker</li>
+          <li>Parietal Alpha — fatigue / relaxation marker</li>
+          <li>Motion & contact artifact filtering</li>
+          <li>QML model → cognitive state classification</li>
+          <li>All spacecraft sensors also active</li>
+        </ul>
+      </div>
+
+      <div class="mode-card mode-cabin">
+        <div class="mode-icon">🛸</div>
+        <div class="mode-title">CABIN MODE</div>
+        <div class="mode-badge">INSIDE SPACECRAFT</div>
+        <div class="mode-desc">Without a helmet, AURORA-X continues monitoring using existing medical telemetry, environmental sensors, sleep schedules, and mission workload data.</div>
+        <ul class="mode-list">
+          <li>Heart rate, HRV, blood oxygen</li>
+          <li>Sleep duration & circadian rhythm</li>
+          <li>Cabin CO₂, pressure, radiation, light</li>
+          <li>Task load & mission phase tracking</li>
+          <li>Mood check-ins when data gaps detected</li>
+          <li>No EEG — intelligent fallback active</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- EEG Signal Pipeline -->
+    <div class="eeg-pipeline reveal" style="margin-top:30px;">
+      <div style="font-size:10px;font-weight:700;color:var(--purple);letter-spacing:3px;margin-bottom:16px;">⚛️ HELMET-INTEGRATED NEURO-ADAPTIVE INTELLIGENCE — SIGNAL PIPELINE</div>
+      <div class="eeg-steps">
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(0,136,255,.15);border-color:rgba(0,136,255,.4);">🪖</div>
+          <div class="eeg-step-title">Electrode Pickup</div>
+          <div class="eeg-step-desc">Embedded in helmet inner lining</div>
+        </div>
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(255,215,0,.12);border-color:rgba(255,215,0,.35);">🔊</div>
+          <div class="eeg-step-title">Raw EEG Signal</div>
+          <div class="eeg-step-desc">Brainwave data collection</div>
+        </div>
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(255,68,70,.12);border-color:rgba(255,68,70,.3);">🚫</div>
+          <div class="eeg-step-title">Artifact Filter</div>
+          <div class="eeg-step-desc">Remove motion & contact noise</div>
+        </div>
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(157,78,221,.15);border-color:rgba(157,78,221,.4);">📊</div>
+          <div class="eeg-step-title">Feature Extraction</div>
+          <div class="eeg-step-desc">Frontal θ · Parietal α</div>
+        </div>
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.35);">⚛️</div>
+          <div class="eeg-step-title">QML Model</div>
+          <div class="eeg-step-desc">8-Qubit VQC classification</div>
+        </div>
+        <div class="eeg-step">
+          <div class="eeg-bubble" style="background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.35);">🤖</div>
+          <div class="eeg-step-title">AURORA-X Engine</div>
+          <div class="eeg-step-desc">Risk assessment & alerts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── RESEARCH ── -->
+<section id="research">
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:50px;">
+      <div class="section-label">Scientific Foundation</div>
+      <div class="section-title">Research-Backed Approach</div>
+      <div class="section-line" style="margin:0 auto;"></div>
+    </div>
+
+    <div class="research-grid reveal">
+      <div class="research-card">
+        <span class="research-org org-nasa">NASA</span>
+        <div>
+          <div class="research-title">EEG Cognitive Workload & Fatigue Assessment</div>
+          <div class="research-desc">NASA Technical Reports Server — investigation into EEG-based monitoring of astronaut cognitive workload and fatigue during mission operations.</div>
+        </div>
+      </div>
+      <div class="research-card">
+        <span class="research-org org-nasa">NASA</span>
+        <div>
+          <div class="research-title">Soyuz Docking Simulation Study</div>
+          <div class="research-desc">EEG sleep-pressure markers correlated with astronaut reaction time performance during critical docking maneuver simulation.</div>
+        </div>
+      </div>
+      <div class="research-card">
+        <span class="research-org org-esa">ESA</span>
+        <div>
+          <div class="research-title">Neurospat Investigation</div>
+          <div class="research-desc">ESA Annual Highlights 2025 — study of attention, memory, perception, and decision-making in microgravity using EEG in-orbit.</div>
+        </div>
+      </div>
+      <div class="research-card">
+        <span class="research-org org-pmc">PMC</span>
+        <div>
+          <div class="research-title">Spaceflight EEG: Practical Challenges</div>
+          <div class="research-desc">PubMed Central — review of motion artifacts, electrical interference, and signal quality issues with EEG in spaceflight environments.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="caution-box reveal">
+      <span class="caution-icon">⚠️</span>
+      <div>
+        <div style="font-weight:700;color:#cc6666;font-size:13px;margin-bottom:4px;">SCIENTIFIC HONESTY NOTE</div>
+        <div class="caution-text">We do <strong>not</strong> claim that EEG biomarkers can reliably predict astronaut mistakes <strong>30–60 seconds in advance</strong> as an established NASA capability. This specific timing claim has not been independently verified and is not presented as such. Our system proposes Helmet-Integrated EEG as a future hardware integration, with the EEG prediction algorithm demonstrated using historical data in our software prototype.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TECH STACK ── -->
+<section>
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:50px;">
+      <div class="section-label">Technology</div>
+      <div class="section-title">What Powers AURORA-X</div>
+      <div class="section-line" style="margin:0 auto;"></div>
+    </div>
+
+    <div class="tech-grid reveal">
+      <div class="tech-card">
+        <div class="tech-icon">🤖</div>
+        <div class="tech-title">Gemini AI</div>
+        <div class="tech-desc">Google Gemini 2.0 Flash powers the AI Flight Surgeon — analyzing combined telemetry and generating clinical, explainable health assessments in real time.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">⚛️</div>
+        <div class="tech-title">Quantum ML (Simulated)</div>
+        <div class="tech-desc">8-Qubit Variational Quantum Circuit simulates EEG cognitive state classification. Demonstrates quantum advantage potential for high-dimensional biomarker pattern recognition.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">🔐</div>
+        <div class="tech-title">BB84 QKD Protocol</div>
+        <div class="tech-desc">Quantum Key Distribution secures the space-to-Earth biometric telemetry channel. QBER monitoring auto-detects eavesdropping and blocks transmission to protect astronaut privacy.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">📊</div>
+        <div class="tech-title">Multi-Domain ML Fusion</div>
+        <div class="tech-desc">Machine learning models fuse physiological, environmental, operational, and psychological data streams. Trained on ISS and analog mission datasets for validated performance.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">🛡️</div>
+        <div class="tech-title">Data Confidence Engine</div>
+        <div class="tech-desc">Novel reliability layer that validates each incoming data stream before it enters the risk engine. Assigns confidence scores, detects sensor failures, and triggers targeted check-ins only when needed.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">🌐</div>
+        <div class="tech-title">Offline-First Architecture</div>
+        <div class="tech-desc">Fully autonomous operation with no dependency on Earth communication. All processing runs locally on-board — built for the communication blackouts of deep space missions to the Moon, Mars, and beyond.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROADMAP ── -->
+<section id="roadmap">
+  <div class="section-wrap">
+    <div class="reveal" style="text-align:center;margin-bottom:60px;">
+      <div class="section-label">Mission Timeline</div>
+      <div class="section-title">Development Roadmap</div>
+      <div class="section-line" style="margin:0 auto;"></div>
+    </div>
+
+    <div class="roadmap reveal">
+      <div class="rm-row">
+        <div class="rm-card">
+          <div class="rm-phase" style="color:var(--green);">◈ PHASE 1 — NOW</div>
+          <div class="rm-title">Software Prototype</div>
+          <div class="rm-desc">ASTRA-Med interactive dashboard with simulated telemetry, QML EEG classifier, Gemini AI Flight Surgeon, and BB84 QKD module. Demo using historical EEG datasets.</div>
+        </div>
+        <div class="rm-dot">🛠️</div>
+        <div class="rm-spacer"></div>
+      </div>
+      <div class="rm-row left">
+        <div class="rm-spacer"></div>
+        <div class="rm-dot">🧪</div>
+        <div class="rm-card">
+          <div class="rm-phase" style="color:var(--cyan);">◈ PHASE 2 — NEAR TERM</div>
+          <div class="rm-title">ISS Dataset Validation</div>
+          <div class="rm-desc">Validate risk analysis models against real NASA Flight Crew Physiological Data. Partner with space medicine researchers to refine EEG and cognitive load algorithms.</div>
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-card">
+          <div class="rm-phase" style="color:var(--purple);">◈ PHASE 3 — MID TERM</div>
+          <div class="rm-title">Helmet-Integrated EEG Hardware</div>
+          <div class="rm-desc">Prototype EEG electrodes embedded in astronaut helmet inner lining. Field test during analog mission environments (Antarctic, underwater, isolation studies). Full dual-mode operation.</div>
+        </div>
+        <div class="rm-dot">🪖</div>
+        <div class="rm-spacer"></div>
+      </div>
+      <div class="rm-row left">
+        <div class="rm-spacer"></div>
+        <div class="rm-dot">🚀</div>
+        <div class="rm-card">
+          <div class="rm-phase" style="color:var(--yellow);">◈ PHASE 4 — LONG TERM</div>
+          <div class="rm-title">Artemis / Gateway Integration</div>
+          <div class="rm-desc">Integration with NASA's Artemis lunar program and Gateway space station systems. Full deployment for deep-space missions to the Moon, Mars, and beyond.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="section-wrap">
+    <div class="cta-box reveal">
+      <div class="cta-title">PROTECTING ASTRONAUTS<br>BEYOND EARTH</div>
+      <p class="cta-sub">When a crew member is 384,400 km from Earth with a 24-minute comm delay,<br>AURORA-X is the AI guardian that never sleeps.</p>
+      <div class="cta-badges">
+        <span class="cta-badge" style="border-color:var(--green);color:var(--green);">✓ No Extra Hardware</span>
+        <span class="cta-badge" style="border-color:var(--cyan);color:var(--cyan);">✓ Fully Autonomous</span>
+        <span class="cta-badge" style="border-color:var(--purple);color:var(--purple);">✓ Quantum Secured</span>
+        <span class="cta-badge" style="border-color:var(--yellow);color:var(--yellow);">✓ Explainable AI</span>
+      </div>
+
+      <!-- Mini QKD status -->
+      <div class="qkd-mini" style="max-width:500px;margin:0 auto;">
+        <div style="font-size:9px;color:#8ab8d0;letter-spacing:2px;margin-bottom:10px;text-align:center;">CURRENT SYSTEM STATUS</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:9px;color:#4a7a94;letter-spacing:1px;">RISK ENGINE</div>
+            <div style="font-size:14px;font-weight:700;color:var(--green);">● RUNNING</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:9px;color:#4a7a94;letter-spacing:1px;">QBER RATE</div>
+            <div style="font-size:14px;font-weight:700;color:var(--green);" id="ctaQber">3.4%</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:9px;color:#4a7a94;letter-spacing:1px;">EARTH LINK</div>
+            <div style="font-size:14px;font-weight:700;color:var(--green);">● SECURE</div>
+          </div>
+        </div>
+        <div class="qkd-secure" style="margin:0 auto;width:fit-content;">🔒 BB84 QKD KEY VERIFIED — ENCRYPTED TELEMETRY ACTIVE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">AURORA-X</div>
+  <div class="footer-text">ADAPTIVE UNIFIED RISK & OPERATIONS AWARENESS — EXTENDED · AURORA-X PROJECT 2026</div>
+  <div style="font-size:11px;color:#2a5272;">ASTRA-MED · POWERED BY GEMINI AI</div>
+</footer>
+
+<script>
+// ── Generate Stars ──────────────────────────────
+(function(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<180;i++){
+    const s=document.createElement('div');
+    const sz=Math.random()*2.5+.5;
+    s.className='star';
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;
+      --op:${.2+Math.random()*.5};--d:${2+Math.random()*5}s;--delay:${Math.random()*5}s;`;
+    c.appendChild(s);
+  }
+})();
+
+// ── Global State ────────────────────────────────
+let activeScenario='nominal';
+
+// ── Scroll Reveal & Visibility Safety ───────────
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:.05});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Safety fallback: ensure all elements become visible immediately
+function makeVisible(){
+  document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+}
+window.addEventListener('DOMContentLoaded', makeVisible);
+window.addEventListener('load', makeVisible);
+setTimeout(makeVisible, 400);
+
+// ── Counter Animation ───────────────────────────
+const countObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      const target=+el.dataset.target;
+      let cur=0;
+      const step=target/40;
+      const timer=setInterval(()=>{
+        cur+=step;
+        if(cur>=target){cur=target;clearInterval(timer);}
+        el.textContent=(target===0?'0':Math.round(cur))+(target===85?'%':'');
+      },40);
+      countObs.unobserve(el);
+    }
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-target]').forEach(el=>countObs.observe(el));
+
+// ── Live CTA QBER ───────────────────────────────
+setInterval(()=>{
+  if(activeScenario!=='qkd'){
+    const v=(1.5+Math.random()*2.5).toFixed(1);
+    const el=document.getElementById('ctaQber');
+    if(el) el.textContent=v+'%';
+  }
+},3000);
+
+// ── Smooth nav active ───────────────────────────
+const sections=document.querySelectorAll('section[id]');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{
+    if(window.scrollY>=s.offsetTop-120) cur=s.id;
+  });
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.style.color=a.getAttribute('href')==='#'+cur?'var(--cyan)':'';
+  });
+},{ passive:true });
+
+// ── MISSION MET CLOCK ───────────────────────────
+let metSeconds=4*86400+18*3600+42*60+19;
+setInterval(()=>{
+  metSeconds++;
+  const d=Math.floor(metSeconds/86400);
+  const h=Math.floor((metSeconds%86400)/3600);
+  const m=Math.floor((metSeconds%3600)/60);
+  const s=metSeconds%60;
+  const pad=n=>n<10?'0'+n:n;
+  const el=document.getElementById('metCounter');
+  if(el) el.textContent=`${pad(d)}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+},1000);
+
+// ── INTERACTIVE EEG CANVAS OSCILLOSCOPE ────────
+const canvas=document.getElementById('eegCanvas');
+const ctx=canvas?canvas.getContext('2d'):null;
+let wavePhase=0;
+let waveFreqMod=1;
+let waveAmpMod=1;
+let isHelmetMode=true;
+
+function drawEeg(){
+  if(!ctx) return;
+  const w=canvas.width;
+  const h=canvas.height;
+  ctx.fillStyle='rgba(2,7,16,0.3)';
+  ctx.fillRect(0,0,w,h);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(0,212,255,0.06)';
+  ctx.lineWidth=1;
+  for(let x=0;x<w;x+=40){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();
+  }
+  for(let y=0;y<h;y+=30){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+  }
+
+  if(!isHelmetMode){
+    ctx.fillStyle='#4a7a94';
+    ctx.font='12px Orbitron, monospace';
+    ctx.textAlign='center';
+    ctx.fillText('CABIN MODE — EEG SENSORS OFFLINE (FALLBACK TELEMETRY ACTIVE)', w/2, h/2);
+    requestAnimationFrame(drawEeg);
+    return;
+  }
+
+  // Draw 3 channels: Theta (cyan), Alpha (purple), Beta (green)
+  const channels=[
+    {color:'#00d4ff', y:45, freq:0.02*waveFreqMod, amp:18*waveAmpMod, label:'θ Frontal'},
+    {color:'#9d4edd', y:105, freq:0.045, amp:14, label:'α Parietal'},
+    {color:'#00ff88', y:165, freq:0.08, amp:10*(waveAmpMod>1.3?0.6:1), label:'β Motor'}
+  ];
+
+  channels.forEach((ch)=>{
+    ctx.strokeStyle=ch.color;
+    ctx.lineWidth=1.5;
+    ctx.shadowBlur=6;
+    ctx.shadowColor=ch.color;
+    ctx.beginPath();
+    for(let x=0;x<w;x+=2){
+      const noise=(Math.sin(x*0.1+wavePhase)+Math.cos(x*0.05-wavePhase))*1.5;
+      const y=ch.y+Math.sin((x*ch.freq)+wavePhase)*ch.amp + noise;
+      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
+  });
+
+  wavePhase+=0.06;
+  requestAnimationFrame(drawEeg);
+}
+requestAnimationFrame(drawEeg);
+
+// ── SCENARIO LOGIC & CREW DATA ─────────────────
+activeScenario='nominal';
+const crewData={
+  hayes:{name:'CDR Hayes', hrBase:68, role:'Commander'},
+  patel:{name:'Dr. A. Patel', hrBase:64, role:'Surgeon'},
+  chen:{name:'Spc. K. Chen', hrBase:74, role:'Specialist'}
+};
+
+function updateCrewMember(){
+  triggerScenario(activeScenario);
+}
+
+function triggerScenario(type){
+  activeScenario=type;
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));
+
+  const crewKey=document.getElementById('crewSelect').value;
+  const crew=crewData[crewKey]||crewData.hayes;
+
+  const hrNum=document.getElementById('hrNum');
+  const subHr=document.getElementById('subHr');
+  const valSpo2=document.getElementById('valSpo2');
+  const valThetaBeta=document.getElementById('valThetaBeta');
+  const subTheta=document.getElementById('subTheta');
+  const valCogState=document.getElementById('valCogState');
+  const subCogState=document.getElementById('subCogState');
+  const valQber=document.getElementById('valQber');
+  const subQber=document.getElementById('subQber');
+  const riskBadge=document.getElementById('riskBadge');
+  const surgeonAssessment=document.getElementById('surgeonAssessment');
+  const interventionList=document.getElementById('interventionList');
+  const modePill=document.getElementById('modePill');
+  const artifactFilterStatus=document.getElementById('artifactFilterStatus');
+
+  if(type==='nominal'){
+    document.getElementById('btnNominal').classList.add('active');
+    isHelmetMode=true;
+    waveFreqMod=1;
+    waveAmpMod=1;
+    modePill.textContent='HELMET MODE ACTIVE';
+    modePill.style.color='var(--green)';
+    modePill.style.borderColor='var(--green)';
+    modePill.style.background='rgba(0,255,136,.1)';
+    hrNum.textContent=crew.hrBase+2;
+    subHr.textContent='Normal Rest · Baseline '+crew.hrBase;
+    valSpo2.innerHTML='98.6<span style="font-size:14px;font-weight:400;color:#4a7a94">%</span>';
+    valThetaBeta.textContent='1.14';
+    valThetaBeta.style.color='var(--green)';
+    subTheta.textContent='Normal Focus (NE state)';
+    valCogState.textContent='NOMINAL (NE)';
+    valCogState.style.color='var(--cyan)';
+    subCogState.textContent='8-Qubit VQC Confidence: 96.8%';
+    valQber.innerHTML='2.4<span style="font-size:14px;font-weight:400;color:#4a7a94">%</span>';
+    valQber.style.color='var(--green)';
+    subQber.textContent='Threshold < 11% · BB84 Locked';
+    riskBadge.textContent='LOW RISK';
+    riskBadge.style.background='rgba(0,255,136,.15)';
+    riskBadge.style.borderColor='var(--green)';
+    riskBadge.style.color='var(--green)';
+    surgeonAssessment.innerHTML=`<div style="font-weight:600;color:var(--cyan);margin-bottom:4px;">Clinical Assessment (${crew.name}):</div>
+      Vitals within nominal envelope. Baseline theta/beta ratio (1.14). Sleep debt 1.4h (acceptable). Workload capacity estimated at 94%. No medical intervention required.`;
+    interventionList.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Garment Biometric Polling: 100 Hz Continuous</div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Suit Environmental Thermal: Nominal (21.4°C)</div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="color:var(--green);">✔</span> Local Deep-Space Autonomous Engine: Armed</div>
+    `;
+    artifactFilterStatus.textContent='Artifact Filter: 99.4% SNR';
+  } else if(type==='fatigue'){
+    document.getElementById('btnFatigue').classList.add('active');
+    isHelmetMode=true;
+    waveFreqMod=0.7;
+    waveAmpMod=1.9; // Large theta wave
+    hrNum.textContent=crew.hrBase+28;
+    subHr.textContent='Elevated Workload · HRV 24ms';
+    valSpo2.innerHTML='95.2<span style="font-size:14px;font-weight:400;color:#4a7a94">%</span>';
+    valThetaBeta.textContent='2.18';
+    valThetaBeta.style.color='var(--red)';
+    subTheta.textContent='θ/β Elevated +91% above baseline!';
+    valCogState.textContent='FATIGUE (SS-3)';
+    valCogState.style.color='var(--red)';
+    subCogState.textContent='High Error Probability detected';
+    riskBadge.textContent='CRITICAL WARNING';
+    riskBadge.style.background='rgba(255,68,70,.2)';
+    riskBadge.style.borderColor='var(--red)';
+    riskBadge.style.color='var(--red)';
+    surgeonAssessment.innerHTML=`<div style="font-weight:600;color:#ff4466;margin-bottom:4px;">Clinical Alert (${crew.name} - EVA Fatigue):</div>
+      Frontal theta power surged 91% above baseline with suppressed beta. Microgravity cognitive fatigue index 8.6/10. High probability of reaction latency and near-miss errors.`;
+    interventionList.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;color:#ff8c00;"><span style="color:var(--yellow);">⚡</span> Automated Action: Suit cooling boosted +12%</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--cyan);"><span style="color:var(--cyan);">⚡</span> Automated Action: HUD simplified to critical-only telemetry</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--green);"><span style="color:var(--green);">⚡</span> Autonomous Advisory: 15-minute EVA rest hold mandated</div>
+    `;
+    artifactFilterStatus.textContent='Artifact Filter: Motion Dampened';
+  } else if(type==='channelized'){
+    document.getElementById('btnChannelized').classList.add('active');
+    isHelmetMode=true;
+    waveFreqMod=1.4;
+    waveAmpMod=1.2;
+    hrNum.textContent=crew.hrBase+18;
+    subHr.textContent='HRV Critically Low: 19ms';
+    valThetaBeta.textContent='1.62';
+    valThetaBeta.style.color='var(--orange)';
+    subTheta.textContent='Tunnel Vision Pattern Identified';
+    valCogState.textContent='CHANNELIZED (CA)';
+    valCogState.style.color='var(--orange)';
+    subCogState.textContent='Loss of Peripheral Situational Awareness';
+    riskBadge.textContent='HIGH RISK';
+    riskBadge.style.background='rgba(255,140,0,.2)';
+    riskBadge.style.borderColor='var(--orange)';
+    riskBadge.style.color='var(--orange)';
+    surgeonAssessment.innerHTML=`<div style="font-weight:600;color:var(--orange);margin-bottom:4px;">Diagnostic Alert (${crew.name} - Channelized Attention):</div>
+      Astronaut locked into isolated procedural loop during manual docking simulation. HRV depressed to 19ms. Sensory gating deficit observed. Recommend cross-check handoff.`;
+    interventionList.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;color:var(--orange);"><span style="color:var(--orange);">⚡</span> Audio cue injected into helmet comm channel</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--cyan);"><span style="color:var(--cyan);">⚡</span> Copilot automated verification prompt dispatched</div>
+    `;
+  } else if(type==='qkd'){
+    document.getElementById('btnQkdAttack').classList.add('active');
+    valQber.innerHTML='14.8<span style="font-size:14px;font-weight:400;color:#ff4466">%</span>';
+    valQber.style.color='var(--red)';
+    subQber.textContent='EAVESDROPPER INTERCEPT DETECTED!';
+    riskBadge.textContent='SECURITY LOCKOUT';
+    riskBadge.style.background='rgba(255,68,70,.25)';
+    riskBadge.style.borderColor='var(--red)';
+    riskBadge.style.color='var(--red)';
+    surgeonAssessment.innerHTML=`<div style="font-weight:600;color:#ff4466;margin-bottom:4px;">BB84 Quantum Security Exception:</div>
+      Quantum Bit Error Rate (QBER) spiked to 14.8% exceeding the 11% theoretical intercept threshold. Photon state disturbance confirmed. Biometric data transmission terminated to preserve astronaut confidentiality.`;
+    interventionList.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;color:#ff4466;"><span style="color:var(--red);">⛔</span> Space-to-Earth Biometric Uplink: SUSPENDED</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--cyan);"><span style="color:var(--cyan);">🔒</span> Local AES-256 Vault: Isolation Protocol Active</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--green);"><span style="color:var(--green);">⚡</span> New BB84 Quantum Key Polarization Negotiation Begun</div>
+    `;
+    const ctaQber=document.getElementById('ctaQber');
+    if(ctaQber){ctaQber.textContent='14.8%';ctaQber.style.color='var(--red)';}
+  } else if(type==='cabin'){
+    document.getElementById('btnCabinMode').classList.add('active');
+    isHelmetMode=false;
+    modePill.textContent='CABIN MODE (FALLBACK)';
+    modePill.style.color='var(--blue)';
+    modePill.style.borderColor='var(--blue)';
+    modePill.style.background='rgba(0,136,255,.15)';
+    valThetaBeta.textContent='N/A';
+    valThetaBeta.style.color='#4a7a94';
+    subTheta.textContent='No Helmet EEG (Cabin Fallback Active)';
+    valCogState.textContent='MULTI-DOMAIN FUSION';
+    valCogState.style.color='var(--blue)';
+    subCogState.textContent='Physiology + Cabin Env + Workload Model';
+    surgeonAssessment.innerHTML=`<div style="font-weight:600;color:var(--blue);margin-bottom:4px;">Cabin Mode Seamless Transition:</div>
+      Helmet removed inside crew cabin. System switched seamlessly to zero-wearable mode: tracking cabin CO2 (0.32%), ambient radiation, sleep log integration, and voice prosody markers.`;
+    interventionList.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;color:var(--blue);"><span style="color:var(--cyan);">✔</span> Cabin Environmental Sensors: Active</div>
+      <div style="display:flex;align-items:center;gap:6px;color:var(--green);"><span style="color:var(--green);">✔</span> Autonomous Check-In Schedule: Armed</div>
+    `;
+  }
+}
+
+// ── CREW CHAT INTERACTION ──────────────────────
+function sendCrewMessage(){
+  const inp=document.getElementById('crewChatInput');
+  const txt=inp.value.trim();
+  if(!txt) return;
+  inp.value='';
+
+  const list=document.getElementById('surgeonAssessment');
+  const time=new Date().toLocaleTimeString();
+
+  const replies=[
+    `Telemetry confirms astronaut neural and cardiovascular markers are well within adaptive limits. Continuous monitoring active.`,
+    `Analyzing EEG frontal spectrum... No anomalous slow-wave surge detected. Recommendation: Maintain current flight plan.`,
+    `Suit microclimate setpoint verified at 21.4°C. CO2 scrubbing rate operating at optimal 99.1% efficiency.`,
+    `Deep space autonomous engine confirms zero need for Earth ground relay for this operation. Local diagnostics confident.`
+  ];
+  const reply=replies[Math.floor(Math.random()*replies.length)];
+
+  list.innerHTML=`
+    <div style="border-bottom:1px solid rgba(0,212,255,.2);padding-bottom:6px;margin-bottom:6px;">
+      <span style="color:#4a7a94;font-size:10px;">[${time}] CREW QUERY:</span> <span style="color:#fff;">"${txt}"</span>
+    </div>
+    <div style="color:var(--green);font-weight:600;margin-bottom:2px;">AI Flight Surgeon Reply:</div>
+    <div style="font-size:11.5px;color:#c8e8f8;line-height:1.5;">${reply}</div>
+  `;
+}
+</script>
+</body>
+</html>
